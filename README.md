@@ -54,7 +54,7 @@ protocols run the following.
 >`make PRIME=prime ARCH=x64 CC=compiler OPT_LEVEL=FAST USE_MULX=TRUE/FALSE USE_ADX=TRUE/FALSE SET=EXTENDED`
 
 where `prime` could be one of the following
-- `P443_3_4_1`
+- `P443_3_5_1`
 - `P765_3_5_1`
 - `P751_3_1`
 - `P434_3_1`
