@@ -1,4 +1,4 @@
-# eSIDH v1.0
+# eSIDH v1.0 (C version)
 
 This code is complementary to the the IACR eprint paper [eSIDH: the revenge of the SIDH](https://ia.cr/2020/021) 
 
@@ -8,7 +8,7 @@ The extended SIDH (eSIDH) is a proposal by
 - Francisco Rodríguez-Henríquez
 ***
 ## Introduction
- The eSIDH is a small variant of the protocol SIDH 
+ The eSIDH is a small variant of the protocol [SIDH](https://sike.org/) 
  which make use of two small primes for Bob isogeny
  computations instead of the original setting of only one prime.
  
@@ -24,7 +24,7 @@ The extended SIDH (eSIDH) is a proposal by
  Quadratic Field arithmetic.
  Both features makes eSIDH a competitive version of SIDH.
 ***
-## Features of this library version
+## Features of this version
 
 
 This version includes the eSIDH primes
@@ -44,6 +44,9 @@ For now on, only the Parallel version of eSIDH is available.
 
 We only test this library under a x64-Linux distribution and a compatible
 compiler supporting the [Open MP api](https://www.openmp.org/).
+
+>Our library is based on [Microsoft SIDH library](https://github.com/Microsoft/PQCrypto-SIDH)
+
 ***
 ## Compilation and Usage
 To create test files for Field and Quadratic Field arithmetic, (single core) SIDH and SIKE
@@ -69,7 +72,7 @@ linux environment variable `OMP_NUM_THREADS` with the desire number of threads
 We present an example of how to compile parallel eSIDH using two cores
 
 To compile the parallel eSIDH  using the prime p_{765}, you must run the following 
-> `make PRIME=P765_3_5_1 ARCH=x64 CC=compiler OPT_LEVEL=FAST USE_MULX=TRUE USE_ADX=TRUE SET=EXTENDED MODE=PARALLEL`
+> `make PRIME=P765_3_5_1 ARCH=x64 CC=clang OPT_LEVEL=FAST USE_MULX=TRUE USE_ADX=TRUE SET=EXTENDED MODE=PARALLEL`
 
 Before running SIDH or SIKE protocols set the variable
 > `export OMP_NUM_THREADS=2`
