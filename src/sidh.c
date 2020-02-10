@@ -660,9 +660,9 @@ int EphemeralSecretAgreement_B(const unsigned char* PrivateKeyB, const unsigned 
 
 #else
     // Retrieve kernel point
-    LADDER3PT(PKB[0], PKB[1], PKB[2], &((digit_t*)PrivateKeyB)[Index_Bob1], BOB1, R2, A24plus, C24);
+    LADDER3PT(PKB[0], PKB[1], PKB[2], &((digit_t*)PrivateKeyB)[Index_Bob1], BOB1, R2, A);
     xTPLe(R2, R2, A24minus, A24plus,  MAX_Bob1);
-    LADDER3PT(PKB[0], PKB[1], PKB[2], (digit_t*)PrivateKeyB, BOB, R1, A24plus, C24);
+    LADDER3PT(PKB[0], PKB[1], PKB[2], (digit_t*)PrivateKeyB, BOB, R1, A);
     xMULe2(R1, R1, A24plus, A24minus, C24, MAX_Bob2);
 #endif
  
