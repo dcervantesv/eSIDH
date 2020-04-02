@@ -479,3 +479,212 @@ static void LADDER3PT(const f2elm_t xP, const f2elm_t xQ, const f2elm_t xPQ, con
     
 }
 
+//**************************New content
+//**************************New content
+
+static void LADDER3PT_pt(void *points)
+{
+    
+//     struct ladder_struct *coordinates = (struct ladder_struct) ladder_stuff;
+    point_proj_t R0 = {0}, R2 = {0};
+    f2elm_t A24 = {0}, xP, xQ, xPQ;
+    digit_t mask;
+    digit_t *m = (digit_t*)(((ladder_struct *)points)->m);
+    int i, nbits, bit, swap, prevbit = 0;
+    unsigned int AliceOrBob = ((ladder_struct *) points)->AliceOrBob;
+    
+    fp2copy(((ladder_struct *) points)->xP, xP);
+    fp2copy(((ladder_struct *) points)->xQ, xQ);
+    fp2copy(((ladder_struct *) points)->xPQ, xPQ);
+    
+//     printf( "\t%d\t %d\n" ,AliceOrBob, ALICE);
+#if ( (BOB_PRIMES == 1) )
+    if (AliceOrBob == ALICE) {
+//         printf("Alice\n");
+        nbits = OALICE_BITS;
+    } else {
+//         printf("Bob\n");
+        nbits = OBOB_BITS;
+    }
+#else
+    if (AliceOrBob == ALICE) {
+        nbits = OALICE_BITS;  
+    } else if(AliceOrBob == BOB) {
+        nbits = OBOB_BITS;
+        
+    } else{
+        nbits = OBOB1_BITS;
+    }
+#endif
+
+    // Initializing constant
+    fpcopy((digit_t*)&Montgomery_one, A24[0]);
+    fp2add(A24, A24, A24);
+    fp2add(((ladder_struct *) points)->A, A24, A24);
+    fp2div2(A24, A24);  
+    fp2div2(A24, A24); // A24 = (A+2)/4
+
+    // Initializing points
+    fp2copy(xQ, R0->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R0->Z);
+    fp2copy(xPQ, R2->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R2->Z); 
+    fp2copy(xP, (((ladder_struct *) points)->R)->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)(((ladder_struct *) points)->R)->Z);
+    fpzero((digit_t*)((((ladder_struct *) points)->R)->Z)[1]);
+    for (i = 0; i < nbits; i++) {
+        bit = (m[i >> LOG2RADIX] >> (i & (RADIX-1))) & 1;
+        swap = bit ^ prevbit;
+        prevbit = bit;
+        mask = 0 - (digit_t)swap;
+        swap_points(((ladder_struct *) points)->R, R2, mask);
+        xDBLADD(R0, R2, ((ladder_struct *) points)->R->X, A24);
+        fp2mul_mont(R2->X, ((ladder_struct *) points)->R->Z, R2->X);
+
+    }
+}
+
+
+static void LADDER3PT_NS(const f2elm_t xP, const f2elm_t xQ, const f2elm_t xPQ, const digit_t* m, const unsigned int AliceOrBob, point_proj_t R, const f2elm_t A, int nbits)
+{
+    point_proj_t R0 = {0}, R2 = {0};
+    f2elm_t A24 = {0};
+    digit_t mask;
+    int i, bit, swap, prevbit = 0;
+
+    // Initializing constant
+    fpcopy((digit_t*)&Montgomery_one, A24[0]);
+    fp2add(A24, A24, A24);
+    fp2add(A, A24, A24);
+    fp2div2(A24, A24);  
+    fp2div2(A24, A24); // A24 = (A+2)/4
+
+    // Initializing points
+    fp2copy(xQ, R0->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R0->Z);
+    fp2copy(xPQ, R2->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R2->Z); 
+    fp2copy(xP, R->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R->Z);
+    fpzero((digit_t*)(R->Z)[1]);
+
+    // Main loop
+    for (i = 0; i < nbits; i++) {
+        bit = (m[i >> LOG2RADIX] >> (i & (RADIX-1))) & 1;
+        swap = bit ^ prevbit;
+        prevbit = bit;
+        mask = 0 - (digit_t)swap;
+        swap_points(R, R2, mask);
+        xDBLADD(R0, R2, R->X, A24);
+        fp2mul_mont(R2->X, R->Z, R2->X);
+    }
+
+}
+
+
+void xADDmu(const felm_t mu, point_proj_t P, const point_proj_t PQ )
+{
+    
+    f2elm_t V0, V1, V2, V3;
+    
+    fpcopy(mu, V3[0]);
+    fpzero(V3[1]);
+    fp2add(P->X, P->Z, V0);
+    fp2sub(P->X, P->Z, V1);
+    fp2mul_mont(V3, V1, V1);
+    fp2add(V0, V1, V2);
+    fp2sub(V0, V1, V1);
+    fp2sqr_mont(V2, V2);
+    fp2sqr_mont(V1, V1);
+    fp2mul_mont(PQ->Z, V2, P->X);
+    fp2mul_mont(PQ->X, V1, P->Z);
+    
+}
+
+static void LADDER3PT_NS_prcmp(const f2elm_t xP, const f2elm_t xPQ, const digit_t* m, const unsigned int AliceOrBob, point_proj_t R, const f2elm_t A, int nbits)
+{    
+    //Works for alice only
+    point_proj_t R2 = {0};
+    f2elm_t A24 = {0};
+    digit_t mask;
+    int i, bit, swap, prevbit = 0, tt = OALICE_BITS - nbits;
+
+    // Initializing constant
+    fpcopy((digit_t*)&Montgomery_one, A24[0]);
+    fp2add(A24, A24, A24);
+    fp2add(A, A24, A24);
+    fp2div2(A24, A24);  
+    fp2div2(A24, A24); // A24 = (A+2)/4
+
+    // Initializing points
+    fp2copy(xPQ, R2->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R2->Z); 
+    fpzero((digit_t*)(R2->Z)[1]);
+    fp2copy(xP, R->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R->Z);
+    fpzero((digit_t*)(R->Z)[1]);
+    for (i = 0; i < nbits; i++) {
+        bit = (m[i >> LOG2RADIX] >> (i & (RADIX-1))) & 1;
+        swap = bit ^ prevbit;
+        prevbit = bit;
+        mask = 0 - (digit_t)swap;
+        swap_points(R, R2, mask);
+        xADDmu(&Mu[(tt+i) * NWORDS64_FIELD], R2, R);
+    }
+}
+
+
+
+static void LADDER3PT_ptNS(void *points)
+{
+    point_proj_t R0 = {0}, R2 = {0};
+    f2elm_t A24 = {0}, xP, xQ, xPQ;
+    digit_t mask;
+    digit_t *m = (digit_t*)(((ladder_struct *)points)->m);
+    int i, nbits, bit, swap, prevbit = 0;
+    unsigned int AliceOrBob = ((ladder_struct *) points)->AliceOrBob;
+    
+    fp2copy(((ladder_struct *) points)->xP, xP);
+    fp2copy(((ladder_struct *) points)->xQ, xQ);
+    fp2copy(((ladder_struct *) points)->xPQ, xPQ);
+    
+#if ( (BOB_PRIMES == 1) )
+    if (AliceOrBob == ALICE) {
+        nbits = OALICE_BITS;
+    } else {
+        nbits = OBOB_BITS;
+    }
+#else
+    if (AliceOrBob == ALICE) {
+        nbits = OALICE_BITS;  
+    } else if(AliceOrBob == BOB) {
+        nbits = OBOB_BITS;
+        
+    } else{
+        nbits = OBOB1_BITS;
+    }
+#endif
+    // Initializing constant
+    fpcopy((digit_t*)&Montgomery_one, A24[0]);
+    fp2add(A24, A24, A24);
+    fp2add(((ladder_struct *) points)->A, A24, A24);
+    fp2div2(A24, A24);  
+    fp2div2(A24, A24); // A24 = (A+2)/4
+
+    // Initializing points
+    fp2copy(xQ, R0->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R0->Z);
+    fp2copy(xPQ, R2->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)R2->Z); 
+    fp2copy(xP, (((ladder_struct *) points)->R)->X);
+    fpcopy((digit_t*)&Montgomery_one, (digit_t*)(((ladder_struct *) points)->R)->Z);
+    fpzero((digit_t*)((((ladder_struct *) points)->R)->Z)[1]);
+    for (i = 0; i < nbits; i++) {
+        bit = (m[i >> LOG2RADIX] >> (i & (RADIX-1))) & 1;
+        swap = bit ^ prevbit;
+        prevbit = bit;
+        mask = 0 - (digit_t)swap;
+        swap_points(((ladder_struct *) points)->R, R2, mask);
+        xADDmu(&Mu[i * NWORDS64_FIELD], R2, ((ladder_struct *) points)->R);
+    }
+}

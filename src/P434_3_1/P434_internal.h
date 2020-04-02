@@ -67,7 +67,7 @@ typedef felm_t  f2elm_t[2];                                           // Datatyp
         
 typedef struct { f2elm_t X; f2elm_t Z; } point_proj;                  // Point representation in projective XZ Montgomery coordinates.
 typedef point_proj point_proj_t[1]; 
-
+typedef struct {f2elm_t xP; f2elm_t xQ; f2elm_t xPQ; digit_t* m; unsigned int AliceOrBob; point_proj_t R; f2elm_t A;} ladder_struct;
 
 
 /**************** Function prototypes ****************/

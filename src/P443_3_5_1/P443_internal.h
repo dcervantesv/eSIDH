@@ -62,7 +62,7 @@
 #define KERNEL_POINTS2          2
 #define MSG_BYTES               32
 #define SECRETKEY_A_BYTES       (OALICE_BITS + 7) / 8
-#define SECRETKEY_B_BYTES       32
+#define SECRETKEY_B_BYTES       32//(OBOB_BITS + OBOB1_BITS + 7) / 8
 #define FP2_ENCODED_BYTES       2*((NBITS_FIELD + 7) / 8)
 
 // SIDH's basic element definitions and point representations
@@ -73,6 +73,7 @@ typedef felm_t  f2elm_t[2];                                           // Datatyp
         
 typedef struct { f2elm_t X; f2elm_t Z; } point_proj;                  // Point representation in projective XZ Montgomery coordinates.
 typedef point_proj point_proj_t[1]; 
+typedef struct {f2elm_t xP; f2elm_t xQ; f2elm_t xPQ; digit_t* m; unsigned int AliceOrBob; point_proj_t R; f2elm_t A;} ladder_struct;
 
 
 

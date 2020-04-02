@@ -58,6 +58,8 @@ endif
 
 ifeq "$(MODE)" "PARALLEL"
     ADDITIONAL_SETTINGS=-fwrapv -fomit-frame-pointer -march=native -madx -mbmi2 -fopenmp -DPARALLEL
+else ifeq "$(MODE)" "NEWSTRAT"
+    ADDITIONAL_SETTINGS=-fwrapv -fomit-frame-pointer -march=native -madx -mbmi2 -fopenmp -pthread -DPARALLEL -DNEWSTRAT 
 endif
 
 AR=ar rcs

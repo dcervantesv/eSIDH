@@ -62,8 +62,8 @@
 #define KERNEL_POINTS2          2
 //extras
 #define MSG_BYTES               32
-#define SECRETKEY_A_BYTES       47
-#define SECRETKEY_B_BYTES       48
+#define SECRETKEY_A_BYTES       47//(OALICE_BITS + 7) / 8
+#define SECRETKEY_B_BYTES       48//(OBOB_BITS + 7) / 8
 #define FP2_ENCODED_BYTES       2*((NBITS_FIELD + 7) / 8)
 
 
@@ -76,7 +76,7 @@ typedef felm_t  f2elm_t[2];                                           // Datatyp
         
 typedef struct { f2elm_t X; f2elm_t Z; } point_proj;                  // Point representation in projective XZ Montgomery coordinates.
 typedef point_proj point_proj_t[1]; 
-
+typedef struct {f2elm_t xP; f2elm_t xQ; f2elm_t xPQ; digit_t* m; unsigned int AliceOrBob; point_proj_t R; f2elm_t A;} ladder_struct;
 
 
 /**************** Function prototypes ****************/
