@@ -1,7 +1,7 @@
 # eSIDH v2.0 (C version)
 
 This code is complementary to the the IACR eprint paper [eSIDH: the revenge of the SIDH](https://ia.cr/2020/021)   
-and the paper Parallel strategies for SIDH: Towards computing SIDH twice as fast (to be published)  
+and the paper [Parallel strategies for SIDH: Towards computing SIDH twice as fast](https://eprint.iacr.org/2020/383)  
 
 The extended SIDH (eSIDH) is a proposal by : 
 
